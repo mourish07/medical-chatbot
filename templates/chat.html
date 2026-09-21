@@ -1,81 +1,558 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<!-- <img src="https://www.prdistribution.com/spirit/uploads/pressreleases/2019/newsreleases/d83341deb75c4c4f6b113f27b1e42cd8-chatbot-florence-already-helps-thousands-of-patients-to-remember-their-medication.png" class="rounded-circle user_img"> -->
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Medical Chatbot</span>
-									<p>Ask me anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
+<html lang="en">
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
-        
-    </body>
+    <title>MedAI | Medical Assistant</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- jQuery loaded before our JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Animated Background -->
+    <div class="background">
+        <div class="background-orb orb-1"></div>
+        <div class="background-orb orb-2"></div>
+        <div class="background-orb orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar-custom">
+
+        <div class="brand">
+            <div class="brand-logo">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+
+            <div>
+                <h2>Med<span>AI</span></h2>
+                <p>Your Health Companion</p>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="#">
+                <i class="fa-solid fa-house"></i> Home
+            </a>
+
+            <a href="#">
+                <i class="fa-solid fa-shield-heart"></i> Reliable Info
+            </a>
+
+            <a href="#">
+                <i class="fa-solid fa-heart"></i> Better Health
+            </a>
+        </div>
+
+        <button class="theme-button">
+            <i class="fa-solid fa-sun"></i>
+        </button>
+
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+
+        <!-- Left Side: Medical Visuals -->
+        <section class="visual-section">
+
+            <!-- AI Assistant Label -->
+            <div class="assistant-label glass-card">
+                <div class="small-glow-icon">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+
+                <div>
+                    <h4>AI Medical Assistant</h4>
+                    <p>Trusted • Accurate • Always Here</p>
+                </div>
+            </div>
+
+            <!-- AI Doctor -->
+            <div class="doctor-card visual-card">
+
+                <div class="doctor-glow"></div>
+
+                <div class="doctor-avatar">
+                    <div class="doctor-head">
+                        <div class="doctor-hair"></div>
+                        <div class="doctor-face">
+                            <div class="eye eye-left"></div>
+                            <div class="eye eye-right"></div>
+                            <div class="smile"></div>
+                        </div>
+                    </div>
+
+                    <div class="doctor-body">
+                        <div class="coat">
+                            <div class="stethoscope"></div>
+                            <div class="doctor-cross">+</div>
+                        </div>
+
+                        <div class="doctor-arm arm-left"></div>
+                        <div class="doctor-arm arm-right"></div>
+                    </div>
+                </div>
+
+                <div class="doctor-speech glass-card">
+                    <h3>Hi! I'm your</h3>
+                    <h3 class="cyan-text">Medical AI Assistant.</h3>
+                    <p>Ask me anything about your health!</p>
+                </div>
+
+            </div>
+
+            <!-- Central Robot -->
+            <div class="robot-card visual-card">
+
+                <div class="floating-label robot-label">
+                    <i class="fa-solid fa-robot"></i>
+                    AI Medical Robot
+                </div>
+
+                <div class="robot-platform"></div>
+
+                <div class="robot">
+
+                    <div class="robot-antenna"></div>
+
+                    <div class="robot-head">
+                        <div class="robot-screen">
+                            <div class="robot-eye eye-one"></div>
+                            <div class="robot-eye eye-two"></div>
+                            <div class="robot-smile"></div>
+                        </div>
+                    </div>
+
+                    <div class="robot-neck"></div>
+
+                    <div class="robot-body">
+                        <div class="robot-cross">+</div>
+                        <div class="robot-panel"></div>
+                    </div>
+
+                    <div class="robot-arm robot-arm-left"></div>
+                    <div class="robot-arm robot-arm-right"></div>
+
+                    <div class="robot-hand hand-left"></div>
+                    <div class="robot-hand hand-right"></div>
+
+                </div>
+
+            </div>
+
+            <!-- Glowing AI Orb -->
+            <div class="orb-card visual-card">
+
+                <div class="floating-label orb-label">
+                    <i class="fa-solid fa-atom"></i>
+                    AI Health Orb
+                </div>
+
+                <div class="ai-orb">
+
+                    <div class="orb-ring ring-one"></div>
+                    <div class="orb-ring ring-two"></div>
+                    <div class="orb-ring ring-three"></div>
+
+                    <div class="orb-core">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+
+                    <span class="particle particle-one"></span>
+                    <span class="particle particle-two"></span>
+                    <span class="particle particle-three"></span>
+
+                </div>
+
+                <div class="orb-platform"></div>
+
+            </div>
+
+            <!-- Holographic Brain -->
+            <div class="brain-card visual-card">
+
+                <div class="floating-label brain-label">
+                    <i class="fa-solid fa-brain"></i>
+                    3D Brain Analysis
+                </div>
+
+                <div class="brain">
+                    <div class="brain-half brain-left"></div>
+                    <div class="brain-half brain-right"></div>
+
+                    <span class="brain-line line-one"></span>
+                    <span class="brain-line line-two"></span>
+                    <span class="brain-line line-three"></span>
+                    <span class="brain-line line-four"></span>
+                </div>
+
+                <div class="brain-platform"></div>
+
+            </div>
+
+            <!-- Medical Hologram -->
+            <div class="hologram-card visual-card">
+
+                <div class="floating-label hologram-label">
+                    <i class="fa-solid fa-person"></i>
+                    Full Body Scan
+                </div>
+
+                <div class="hologram-platform"></div>
+
+                <div class="hologram-body">
+
+                    <div class="holo-head"></div>
+                    <div class="holo-neck"></div>
+                    <div class="holo-chest"></div>
+
+                    <div class="holo-arm holo-arm-left"></div>
+                    <div class="holo-arm holo-arm-right"></div>
+
+                    <div class="holo-leg holo-leg-left"></div>
+                    <div class="holo-leg holo-leg-right"></div>
+
+                </div>
+
+                <div class="health-panel panel-left">
+                    <p><i class="fa-solid fa-heart-pulse"></i> Heart Rate</p>
+                    <strong>72 <small>bpm</small></strong>
+                </div>
+
+                <div class="health-panel panel-right">
+                    <p><i class="fa-solid fa-temperature-half"></i> Temperature</p>
+                    <strong>36.6 <small>°C</small></strong>
+                </div>
+
+                <div class="health-panel panel-bottom">
+                    <p><i class="fa-solid fa-droplet"></i> Oxygen Level</p>
+                    <strong>98 <small>%</small></strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Right Side: Chatbot -->
+        <section class="chat-section">
+
+            <div class="chat-container">
+
+                <!-- Chat Header -->
+                <div class="chat-header">
+
+                    <div class="chat-title">
+
+                        <div class="chat-avatar">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+
+                        <div>
+                            <h2>Medical AI</h2>
+                            <p>
+                                <span class="online-dot"></span>
+                                Online Assistant
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="chat-status">
+                        <i class="fa-solid fa-shield-heart"></i>
+                    </div>
+
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="messages" id="messageFormeight">
+
+                    <div class="welcome-message">
+
+                        <div class="welcome-icon">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+
+                        <h2>Start a conversation</h2>
+
+                        <p>
+                            Ask questions about symptoms, health,
+                            and general medical information.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- Typing Indicator -->
+                <div
+                    class="typing-container"
+                    id="typingIndicator"
+                    style="display: none;">
+
+                    <div class="mini-bot">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <span>AI is thinking...</span>
+
+                </div>
+
+                <!-- Suggested Questions -->
+                <div class="suggestions">
+
+                    <button
+                        class="suggestion-btn"
+                        data-message="What are the symptoms of diabetes?">
+                        <i class="fa-solid fa-droplet"></i>
+                        Diabetes symptoms
+                    </button>
+
+                    <button
+                        class="suggestion-btn"
+                        data-message="What are the symptoms of fever?">
+                        <i class="fa-solid fa-temperature-half"></i>
+                        Fever symptoms
+                    </button>
+
+                    <button
+                        class="suggestion-btn"
+                        data-message="How can I maintain a healthy lifestyle?">
+                        <i class="fa-solid fa-leaf"></i>
+                        Healthy lifestyle
+                    </button>
+
+                    <button
+                        class="suggestion-btn"
+                        data-message="What are common health precautions?">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                        Health precautions
+                    </button>
+
+                </div>
+
+                <!-- Input -->
+                <div class="chat-input-area">
+
+                    <form id="messageArea">
+
+                        <input
+                            type="text"
+                            id="text"
+                            name="msg"
+                            placeholder="Ask your medical question..."
+                            autocomplete="off"
+                            required>
+
+                        <button
+                            type="submit"
+                            id="send"
+                            aria-label="Send message">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+
+                    </form>
+
+                    <p class="disclaimer">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        General information only. Not medical advice.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <i class="fa-solid fa-shield-heart"></i>
+            This chatbot provides general information, not medical advice.
+        </p>
+
+        <p>Powered by AI • Built for better health</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+
+        $(document).ready(function () {
+
+            function scrollToBottom() {
+                const messages = document.getElementById("messageFormeight");
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function showTyping() {
+                $("#typingIndicator").fadeIn(200);
+                scrollToBottom();
+            }
+
+            function hideTyping() {
+                $("#typingIndicator").fadeOut(200);
+            }
+
+            function addUserMessage(message) {
+
+                const html = `
+                    <div class="message-row user-row">
+                        <div class="message-bubble user-bubble">
+                            <div class="message-label">
+                                <i class="fa-solid fa-user"></i>
+                                You
+                            </div>
+                            <div class="message-text"></div>
+                        </div>
+                    </div>
+                `;
+
+                const messageElement = $(html);
+                messageElement.find(".message-text").text(message);
+
+                $("#messageFormeight").append(messageElement);
+
+                scrollToBottom();
+            }
+
+            function addBotMessage(message) {
+
+                const html = `
+                    <div class="message-row bot-row">
+
+                        <div class="mini-bot">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+
+                        <div class="message-bubble bot-bubble">
+
+                            <div class="message-label">
+                                <i class="fa-solid fa-brain"></i>
+                                Medical AI
+                            </div>
+
+                            <div class="message-text"></div>
+
+                        </div>
+
+                    </div>
+                `;
+
+                const messageElement = $(html);
+                messageElement.find(".message-text").text(message);
+
+                $("#messageFormeight").append(messageElement);
+
+                scrollToBottom();
+            }
+
+            $("#messageArea").on("submit", function (event) {
+
+                event.preventDefault();
+
+                const message = $("#text").val().trim();
+
+                if (message === "") {
+                    return;
+                }
+
+                addUserMessage(message);
+
+                $("#text").val("");
+                $("#send").prop("disabled", true);
+
+                showTyping();
+
+                $.ajax({
+
+                    type: "POST",
+
+                    url: "/get",
+
+                    data: {
+                        msg: message
+                    },
+
+                    success: function (response) {
+                        hideTyping();
+                        addBotMessage(response);
+                    },
+
+                    error: function (xhr, status, error) {
+
+                        hideTyping();
+
+                        addBotMessage(
+                            "Sorry, something went wrong. Please try again."
+                        );
+
+                        console.error("Error:", error);
+                    },
+
+                    complete: function () {
+                        $("#send").prop("disabled", false);
+                        $("#text").focus();
+                    }
+
+                });
+
+            });
+
+            $(".suggestion-btn").on("click", function () {
+
+                const message = $(this).data("message");
+
+                $("#text").val(message);
+                $("#messageArea").trigger("submit");
+
+            });
+
+            $("#text").on("keydown", function (event) {
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    $("#messageArea").trigger("submit");
+
+                }
+
+            });
+
+            $("#text").focus();
+
+        });
+
+    </script>
+
+</body>
+
 </html>
