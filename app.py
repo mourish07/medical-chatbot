@@ -1,8 +1,7 @@
-
 from flask import Flask, render_template, jsonify, request
 from src.helper import download_hugging_face_embeddings
 from langchain_pinecone import PineconeVectorStore
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,35 +15,45 @@ app = Flask(__name__)
 load_dotenv()
 
 
+# Load Pinecone API key
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
-
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
 
+# Load Hugging Face token
+HF_TOKEN = os.environ.get("HF_TOKEN")
+
+
+# Download Hugging Face embeddings
 embeddings = download_hugging_face_embeddings()
 
-index_name = "medical-chatbot"
 
 # Connect to the existing Pinecone index
+index_name = "medical-chatbot"
+
 docsearch = PineconeVectorStore.from_existing_index(
     index_name=index_name,
     embedding=embeddings
 )
 
 
+# Create retriever
 retriever = docsearch.as_retriever(
     search_type="similarity",
     search_kwargs={"k": 3}
 )
 
 
-# Use Ollama instead of OpenAI
-chatModel = ChatOllama(
-    model="llama3.2:1b",
+# Use Hugging Face Inference Provider through OpenAI-compatible API
+chatModel = ChatOpenAI(
+    model="openai/gpt-oss-20b:deepinfra",
+    base_url="https://router.huggingface.co/v1",
+    api_key=HF_TOKEN,
     temperature=0.3
 )
 
 
+# Create prompt
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system_prompt),
@@ -53,11 +62,14 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 
+# Create question-answer chain
 question_answer_chain = create_stuff_documents_chain(
     chatModel,
     prompt
 )
 
+
+# Create RAG chain
 rag_chain = create_retrieval_chain(
     retriever,
     question_answer_chain
@@ -85,4 +97,3 @@ def chat():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
-    
